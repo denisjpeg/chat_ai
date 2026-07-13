@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Nehir'in Asistanı">
+    
+    <!-- Favicon hatasını gidermek için buraya ekle -->
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    
+    <title>Nehir'in Asistanı</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Menü Butonu -->
+    <div id="menu-btn" onclick="toggleSidebar()">
+        <span class="icon-open">☰</span>
+        <span class="icon-close">✕</span>
+    </div>
+
+    <!-- Overlay (boşluğa basınca kapatmak için) -->
+    <div id="overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar (Yan Menü) -->
+    <div id="sidebar">
+        <button id="new-chat-btn" onclick="startNewChat()">+ Yeni sohbet</button>
+        <div class="sidebar-title">Sohbetler</div>
+        <div id="history-list"><div class="empty">Henüz sohbet yok.</div></div>
+    </div>
+
+    <!-- Karşılama Ekranı -->
+    <div id="welcome-msg" class="welcome-screen">
+        <div class="ripple-avatar">
+            <div class="ripple-core"></div>
+        </div>
+        <div class="greeting-card">
+            <h1 id="greeting"></h1>
+            <p>Bir şeyler yazarak sohbete başla.</p>
+        </div>
+    </div>
+
+    <!-- Sohbet Alanı -->
+    <div id="chat-box"></div>
+
+    <!-- Giriş Alanı -->
+    <div id="input-area">
+        <input type="text" id="user-input" placeholder="Bir şeyler yaz...">
+        <div class="icon-btn" id="attach-btn" onclick="toggleAttachMenu()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+            </svg>
+        </div>
+        <button onclick="sendMessage()">Gönder</button>
+    </div>
+
+    <!-- Ekleme Menüsü (Action Sheet) -->
+    <div id="attach-overlay" onclick="closeAttachMenu()"></div>
+    <div id="attach-sheet">
+        <div class="attach-option" onclick="triggerUpload('file')">
+            <span class="attach-icon">📄</span> Dosya Yükle
+        </div>
+        <div class="attach-option" onclick="triggerUpload('image')">
+            <span class="attach-icon">🖼️</span> Görsel Yükle
+        </div>
+        <div class="attach-option deniz" onclick="pokeDeniz()">
+            <span class="attach-icon">🌊</span> Denize Kız
+        </div>
+        <div class="attach-cancel" onclick="closeAttachMenu()">Vazgeç</div>
+    </div>
+    <input type="file" id="file-input" hidden>
+    <input type="file" id="image-input" accept="image/*" hidden>
+
+    <script src="app.js"></script>
+</body>
+</html>

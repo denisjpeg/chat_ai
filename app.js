@@ -70,19 +70,16 @@ function migrateOldHistory() {
 function initApp() {
     migrateOldHistory();
     let sessions = getSessions();
-    let active = sessions.find(s => s.id === getActiveId());
 
+    // Siteye her girişte temiz bir sayfa: zaten boş bir sohbet varsa onu kullan, yoksa yeni aç
+    let active = sessions.find(s => s.messages.length === 0);
     if (!active) {
-        if (sessions.length) {
-            active = sessions[0];
-            setActiveId(active.id);
-        } else {
-            active = createSessionObject();
-            sessions.unshift(active);
-            saveSessions(sessions);
-            setActiveId(active.id);
-        }
+        active = createSessionObject();
+        sessions.unshift(active);
+        saveSessions(sessions);
     }
+    setActiveId(active.id);
+
     renderSidebar();
     renderActiveChat();
 }

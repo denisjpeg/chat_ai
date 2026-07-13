@@ -98,7 +98,7 @@ function renderActiveChat() {
     } else {
         hideWelcomeScreen();
         active.messages.forEach(msg => {
-            addMessageToUI(msg.role === 'user' ? 'user' : 'ai', msg.content);
+            addMessageToUI(msg.role === 'user' ? 'user' : 'ai', msg.content, msg.attachment);
         });
     }
 }
@@ -130,7 +130,62 @@ function switchSession(id) {
     toggleSidebar();
 }
 
-// "Denizi Dürt"
+// ---------------- Ek Dosya / Görsel Önizleme ----------------
+let pendingAttachment = null; // { kind: 'image'|'file', name, type, dataUrl }
+
+function handleFileSelect(event, kind) {
+    const file = event.target.files[0];
+    event.target.value = ''; // aynı dosya tekrar seçilebilsin diye sıfırla
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+        pendingAttachment = {
+            kind: kind,
+            name: file.name,
+            type: file.type,
+            dataUrl: reader.result
+        };
+        renderAttachmentPreview();
+    };
+    reader.onerror = () => alert('Dosya okunamadı, tekrar dener misin?');
+    reader.readAsDataURL(file);
+}
+
+function renderAttachmentPreview() {
+    const container = document.getElementById('attachment-preview');
+    if (!pendingAttachment) {
+        container.innerHTML = '';
+        return;
+    }
+    if (pendingAttachment.kind === 'image') {
+        container.innerHTML = `
+            <div class="preview-chip">
+                <img src="${pendingAttachment.dataUrl}" alt="önizleme">
+                <div class="preview-remove" onclick="clearAttachment()">✕</div>
+            </div>`;
+    } else {
+        container.innerHTML = `
+            <div class="preview-chip file-chip">
+                <span class="file-chip-icon">📄</span>
+                <span class="file-chip-name">${escapeHtml(pendingAttachment.name)}</span>
+                <div class="preview-remove" onclick="clearAttachment()">✕</div>
+            </div>`;
+    }
+}
+
+function clearAttachment() {
+    pendingAttachment = null;
+    renderAttachmentPreview();
+}
+
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+
 async function pokeDeniz() {
     closeAttachMenu();
     await fetch('https://tfyphciyqshdvkpsrxxl.supabase.co/functions/v1/send-telegram', {
@@ -145,11 +200,14 @@ async function pokeDeniz() {
 async function sendMessage() {
     const input = document.getElementById('user-input');
     const message = input.value.trim();
-    if (!message) return;
+    if (!message && !pendingAttachment) return;
 
     hideWelcomeScreen();
-    addMessageToUI('user', message);
+
+    const attachment = pendingAttachment;
+    addMessageToUI('user', message, attachment);
     input.value = '';
+    clearAttachment();
 
     const sessions = getSessions();
     let active = sessions.find(s => s.id === getActiveId());
@@ -159,8 +217,10 @@ async function sendMessage() {
         setActiveId(active.id);
     }
 
-    active.messages.push({ role: 'user', content: message });
-    if (!active.title) active.title = generateTitle(message);
+    const userMsg = { role: 'user', content: message };
+    if (attachment) userMsg.attachment = attachment;
+    active.messages.push(userMsg);
+    if (!active.title) active.title = generateTitle(message || attachment.name);
     active.updatedAt = Date.now();
     saveSessions(sessions);
     renderSidebar();
@@ -169,7 +229,11 @@ async function sendMessage() {
         const res = await fetch('https://tfyphciyqshdvkpsrxxl.supabase.co/functions/v1/chat-ai', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: message, history: active.messages.slice(-10) })
+            body: JSON.stringify({
+                message: message,
+                history: active.messages.slice(-10),
+                attachment: attachment ? { kind: attachment.kind, name: attachment.name, type: attachment.type, data: attachment.dataUrl } : null
+            })
         });
         const data = await res.json();
         addMessageToUI('ai', data.content);
@@ -188,11 +252,30 @@ async function sendMessage() {
 }
 
 // UI Fonksiyonları
-function addMessageToUI(role, text) {
+function addMessageToUI(role, text, attachment) {
     const chatBox = document.getElementById('chat-box');
     const div = document.createElement('div');
     div.className = `message ${role}`;
-    div.innerText = text;
+
+    if (attachment && attachment.kind === 'image') {
+        const img = document.createElement('img');
+        img.src = attachment.dataUrl;
+        img.alt = attachment.name || 'görsel';
+        img.className = 'message-image';
+        div.appendChild(img);
+    } else if (attachment && attachment.kind === 'file') {
+        const chip = document.createElement('div');
+        chip.className = 'message-file-chip';
+        chip.innerHTML = `📄 <span>${escapeHtml(attachment.name)}</span>`;
+        div.appendChild(chip);
+    }
+
+    if (text) {
+        const textEl = document.createElement('div');
+        textEl.innerText = text;
+        div.appendChild(textEl);
+    }
+
     chatBox.appendChild(div);
     chatBox.scrollTop = chatBox.scrollHeight;
 }
@@ -220,6 +303,8 @@ function startNewChat() {
 // Menü ve Dinleyiciler
 window.onload = initApp;
 document.getElementById('user-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage(); });
+document.getElementById('file-input').addEventListener('change', (e) => handleFileSelect(e, 'file'));
+document.getElementById('image-input').addEventListener('change', (e) => handleFileSelect(e, 'image'));
 
 function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('open');

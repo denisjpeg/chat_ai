@@ -48,13 +48,16 @@
 
     <!-- Giriş Alanı -->
     <div id="input-area">
-        <input type="text" id="user-input" placeholder="Bir şeyler yaz...">
-        <div class="icon-btn" id="attach-btn" onclick="toggleAttachMenu()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
-            </svg>
+        <div id="attachment-preview"></div>
+        <div class="input-row">
+            <input type="text" id="user-input" placeholder="Bir şeyler yaz...">
+            <div class="icon-btn" id="attach-btn" onclick="toggleAttachMenu()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <button onclick="sendMessage()">Gönder</button>
         </div>
-        <button onclick="sendMessage()">Gönder</button>
     </div>
 
     <!-- Ekleme Menüsü (Action Sheet) -->

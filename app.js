@@ -231,7 +231,7 @@ async function sendMessage() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 message: message,
-                history: active.messages.slice(-10),
+                history: active.messages.slice(-10).map(m => ({ role: m.role, content: m.content })),
                 attachment: attachment ? { kind: attachment.kind, name: attachment.name, type: attachment.type, data: attachment.dataUrl } : null
             })
         });

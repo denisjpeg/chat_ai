@@ -249,6 +249,27 @@ body {
     box-shadow: 0 4px 14px rgba(0,0,0,0.25);
 }
 
+.message-image {
+    display: block;
+    max-width: 220px;
+    max-height: 220px;
+    width: 100%;
+    object-fit: cover;
+    border-radius: 14px;
+    margin-bottom: 6px;
+}
+.message-file-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    padding: 8px 10px;
+    border-radius: 12px;
+    background: rgba(0,0,0,0.08);
+    margin-bottom: 6px;
+}
+.message.user .message-file-chip { background: rgba(0,0,0,0.15); }
+
 /* ---------------- Giriş Alanı ---------------- */
 #input-area {
     position: fixed;
@@ -258,13 +279,72 @@ body {
     background: var(--ink-elevated);
     border: 1px solid var(--ink-soft);
     border-radius: var(--radius-lg);
-    padding: 10px 10px 10px 18px;
+    padding: 10px;
     display: flex;
-    align-items: center;
-    gap: 8px;
+    flex-direction: column;
     box-shadow: 0 10px 30px rgba(0,0,0,0.35);
     z-index: 500;
 }
+
+.input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 0 0 8px;
+}
+
+/* Görsel/Dosya Önizleme Çubuğu (Gemini tarzı) */
+#attachment-preview:empty { display: none; }
+#attachment-preview {
+    display: flex;
+    padding: 2px 4px 10px;
+}
+.preview-chip {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    animation: rise 0.2s ease-out;
+}
+.preview-chip img {
+    width: 56px;
+    height: 56px;
+    object-fit: cover;
+    border-radius: 14px;
+    border: 1px solid var(--ink-soft);
+    display: block;
+}
+.preview-chip.file-chip {
+    background: var(--ink-soft);
+    padding: 10px 30px 10px 12px;
+    border-radius: var(--radius-sm);
+    max-width: 220px;
+}
+.file-chip-icon { font-size: 17px; }
+.file-chip-name {
+    font-size: 13px;
+    color: var(--white-dim);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.preview-remove {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--danger);
+    color: white;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+}
+.preview-chip.file-chip .preview-remove { top: 8px; right: 6px; }
 
 #file-input, #image-input { display: none; }
 

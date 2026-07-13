@@ -138,6 +138,7 @@ body {
     transition: background 0.15s;
 }
 .history-item:hover { background: var(--ink-soft); }
+.history-item.active { background: var(--water-deep); color: var(--white); font-weight: 600; }
 
 /* ---------------- Overlay ---------------- */
 #overlay {

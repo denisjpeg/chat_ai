@@ -270,6 +270,30 @@ body {
 }
 .message.user .message-file-chip { background: rgba(0,0,0,0.15); }
 
+/* AI cevaplarındaki Markdown öğeleri */
+.message.ai strong { font-weight: 700; }
+.message.ai strong.md-h { display: block; margin: 6px 0 2px; font-family: var(--font-display); font-size: 15px; }
+.message.ai em { font-style: italic; }
+.message.ai code {
+    background: rgba(18, 74, 61, 0.12);
+    padding: 1px 5px;
+    border-radius: 5px;
+    font-size: 13px;
+    font-family: 'SFMono-Regular', Menlo, monospace;
+}
+.message.ai pre.md-code {
+    background: #0E1B18;
+    color: var(--water-light);
+    padding: 10px 12px;
+    border-radius: 12px;
+    overflow-x: auto;
+    font-size: 13px;
+    margin: 6px 0;
+    white-space: pre-wrap;
+}
+.message.ai ul { margin: 4px 0 4px 18px; }
+.message.ai li { margin: 2px 0; }
+
 /* ---------------- Giriş Alanı ---------------- */
 #input-area {
     position: fixed;

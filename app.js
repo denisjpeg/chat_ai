@@ -98,7 +98,8 @@ function renderActiveChat() {
     } else {
         hideWelcomeScreen();
         active.messages.forEach(msg => {
-            addMessageToUI(msg.role === 'user' ? 'user' : 'ai', msg.content, msg.attachment);
+            const content = msg.role === 'assistant' ? stripThinking(msg.content) : msg.content;
+            addMessageToUI(msg.role === 'user' ? 'user' : 'ai', content, msg.attachment);
         });
     }
 }
@@ -185,6 +186,32 @@ function escapeHtml(str) {
     return div.innerHTML;
 }
 
+// Modelin gizli kalması gereken <think>...</think> düşünme bloğu sızarsa temizler
+function stripThinking(text) {
+    if (!text) return text;
+    let cleaned = text.replace(/<think>[\s\S]*?<\/think>/gi, '');
+    const openIdx = cleaned.search(/<think>/i);
+    if (openIdx !== -1) cleaned = cleaned.slice(0, openIdx);
+    return cleaned.trim();
+}
+
+// Basit ve güvenli Markdown -> HTML dönüştürücü (AI cevaplarındaki **kalın**, ### başlık vb. için)
+function renderMarkdown(text) {
+    if (!text) return '';
+    let html = escapeHtml(text);
+
+    html = html.replace(/```([\s\S]*?)```/g, (m, code) => `<pre class="md-code">${code.trim()}</pre>`);
+    html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+    html = html.replace(/^#{1,3}\s+(.*)$/gm, '<strong class="md-h">$1</strong>');
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, '$1<em>$2</em>');
+    html = html.replace(/^[-*]\s+(.*)$/gm, '<li>$1</li>');
+    html = html.replace(/(<li>[\s\S]*?<\/li>)(?:\s*<br>\s*)?(?=<li>|$)/g, '$1');
+    html = html.replace(/(<li>[\s\S]*<\/li>)/g, '<ul>$1</ul>');
+    html = html.replace(/\n/g, '<br>');
+    return html;
+}
+
 
 async function pokeDeniz() {
     closeAttachMenu();
@@ -236,12 +263,13 @@ async function sendMessage() {
             })
         });
         const data = await res.json();
-        addMessageToUI('ai', data.content);
+        const cleanContent = stripThinking(data.content);
+        addMessageToUI('ai', cleanContent);
 
         const freshSessions = getSessions();
         const freshActive = freshSessions.find(s => s.id === active.id);
         if (freshActive) {
-            freshActive.messages.push({ role: 'assistant', content: data.content });
+            freshActive.messages.push({ role: 'assistant', content: cleanContent });
             freshActive.updatedAt = Date.now();
             saveSessions(freshSessions);
             renderSidebar();
@@ -272,7 +300,11 @@ function addMessageToUI(role, text, attachment) {
 
     if (text) {
         const textEl = document.createElement('div');
-        textEl.innerText = text;
+        if (role === 'ai') {
+            textEl.innerHTML = renderMarkdown(text);
+        } else {
+            textEl.innerText = text;
+        }
         div.appendChild(textEl);
     }
 
